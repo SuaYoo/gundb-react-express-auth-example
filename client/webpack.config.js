@@ -12,7 +12,7 @@ module.exports = {
     ],
     // fixes Critical dependency: the request of a dependency is an expression
     // https://github.com/amark/gun/issues/743
-    noParse: /gun\.js$/,
+    noParse: /(\/gun|gun\/sea)\.js$/,
   },
   devtool: 'inline-source-map',
   plugins: [

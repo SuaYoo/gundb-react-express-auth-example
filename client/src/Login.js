@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import gun from 'gun/gun';
+import Gun from 'gun/gun';
+import 'gun/sea';
 
 export default function Login() {
   const gunRef = useRef();
+  const userRef = useRef();
   const [username, setUsername] = useState('');
   const [passphrase, setPassphrase] = useState('');
 
@@ -12,12 +14,21 @@ export default function Login() {
       'https://gun-manhattan.herokuapp.com/gun',
     ]);
 
+    const user = gun.user();
+
     // only initialize once when component is mounted
     gunRef.current = gun;
+    userRef.current = user;
   }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    userRef.current.auth(username, password);
+  };
+
+  const handleSignUp = () => {
+    userRef.current.create(username, password);
   };
 
   return (
@@ -44,6 +55,7 @@ export default function Login() {
         </label>
       </div>
       <button type="submit">sign in</button>
+      <button onClick={handleSignUp}>sign up</button>
     </form>
   );
 }
