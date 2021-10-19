@@ -1,0 +1,10 @@
+{
+  "name": "gundb-react-express-auth",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "gundb-react-express-auth-server",
+    "gundb-react-express-auth-client"
+  ]
+}
