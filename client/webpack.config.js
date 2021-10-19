@@ -10,6 +10,9 @@ module.exports = {
         use: 'babel-loader',
       },
     ],
+    // fixes Critical dependency: the request of a dependency is an expression
+    // https://github.com/amark/gun/issues/743
+    noParse: /gun\.js$/,
   },
   devtool: 'inline-source-map',
   plugins: [

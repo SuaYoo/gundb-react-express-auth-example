@@ -3,5 +3,12 @@
   "version": "0.0.0",
   "license": "MIT",
   "private": true,
-  "main": "server.js"
+  "main": "server.js",
+  "scripts": {
+    "start": "node ./server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "gun": "^0.2020.1235"
+  }
 }
