@@ -1,4 +1,3 @@
-import Gun from 'gun/gun';
 import React, { useState } from 'react';
 
 export default function UserInfo({ gunRef, userRef }) {
@@ -10,34 +9,20 @@ export default function UserInfo({ gunRef, userRef }) {
   const [profileEditError, setProfileEditError] = useState();
   const [profileEditSuccess, setProfileEditSuccess] = useState();
 
-  const getUsername = () => {
-    return new Promise((resolve) => {
-      gunRef.current
-        .get(`~${userRef.current.is.alias}`)
-        .get('alias')
-        .once(resolve);
-    });
-  };
-
   const handleSubmitProfile = (e) => {
     e.preventDefault();
 
     setProfileEditError();
     setProfileEditSuccess();
 
-    getUsername().then((username) => {
-      gunRef.current
-        .get(username)
-        .get('displayName')
-        .put(displayName, ({ err }) => {
-          if (err) {
-            setProfileEditError(err);
-          } else {
-            setProfileEditSuccess(
-              `Successfully changed display name to ${displayName}`
-            );
-          }
-        });
+    userRef.current.get('displayName').put(displayName, ({ err }) => {
+      if (err) {
+        setProfileEditError(err);
+      } else {
+        setProfileEditSuccess(
+          `Successfully changed display name to ${displayName}`
+        );
+      }
     });
   };
 
@@ -48,7 +33,7 @@ export default function UserInfo({ gunRef, userRef }) {
     setAuthSuccess();
 
     // re-auth user
-    getUsername().then((username) => {
+    userRef.current.get('alias').then((username) => {
       userRef.current.auth(username, oldPassword, ({ err, sea, ...other }) => {
         if (err) {
           setAuthError('Wrong password');

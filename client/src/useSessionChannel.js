@@ -5,7 +5,7 @@ export default function useSessionChannel({ userRef }) {
   const channelRef = useRef();
 
   useEffect(() => {
-    const channel = new BroadcastChannel('test_channel');
+    const channel = new BroadcastChannel('session_channel');
 
     // let other tabs know we're here, in case one is logged in
     channel.postMessage({

@@ -10,7 +10,7 @@ const App = () => {
   const gunRef = useRef();
   const userRef = useRef();
   const sessionChannel = useSessionChannel({ userRef });
-  const [isLoggedIn, setIsLoggedIn] = useState();
+  const [userProfile, setUserProfile] = useState();
 
   useEffect(() => {
     const gun = Gun(['http://localhost:8765/gun']);
@@ -30,28 +30,23 @@ const App = () => {
         value: window.sessionStorage.getItem('pair'),
       });
 
-      // user.get('profile').put({
-      //   name: 'test name',
-      // });
-
-      setIsLoggedIn(true);
+      user.get('alias').once((username) => {
+        setUserProfile((p) => ({
+          ...p,
+          username,
+        }));
+      });
     });
 
     sessionChannel.onMessage((e) => {
       const { eventName } = e.data;
 
+      console.log(eventName);
+
       if (eventName === 'REMOVE_YOUR_CREDS') {
         logOut();
       }
     });
-
-    gun
-      .get('users')
-      .once()
-      .map()
-      .once((user, username) => {
-        console.log('user:', user, username);
-      });
 
     gunRef.current = gun;
     userRef.current = user;
@@ -74,17 +69,18 @@ const App = () => {
       });
     }
 
-    setIsLoggedIn(false);
+    setUserProfile();
   };
 
   return (
     <div>
-      {!isLoggedIn && <Login gunRef={gunRef} userRef={userRef} />}
-      {isLoggedIn && (
+      {!userProfile && <Login gunRef={gunRef} userRef={userRef} />}
+      {userProfile && (
         <div>
           <h1>community</h1>
           <div>
-            logged in <button onClick={logOut}>Log out</button>
+            logged in as {userProfile.username}.{' '}
+            <button onClick={logOut}>Log out</button>
           </div>
           <h2>your info</h2>
           <div>

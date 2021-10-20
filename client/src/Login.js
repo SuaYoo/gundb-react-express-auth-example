@@ -1,4 +1,3 @@
-import Gun from 'gun/gun';
 import React, { useState } from 'react';
 
 export default function Login({ gunRef, userRef }) {
@@ -8,6 +7,7 @@ export default function Login({ gunRef, userRef }) {
 
   const logIn = () => {
     userRef.current.auth(username, password, ({ err }) => {
+      console.log(username, err);
       if (err) {
         setAuthError(err);
       }
@@ -33,12 +33,9 @@ export default function Login({ gunRef, userRef }) {
           if (err) {
             setAuthError(err);
           } else {
-            // add user to db
-            const newUser = gunRef.current
-              .get(username)
-              .put({ displayName: null });
-
-            gunRef.current.get('users').set(newUser);
+            // TODO add user to db so we can build user list
+            // NOTE gundb is probably not the best place to store this
+            // list since anyone can edit it?
 
             // log in
             logIn();
