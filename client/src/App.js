@@ -3,11 +3,12 @@ import Gun from 'gun/gun';
 import 'gun/sea';
 
 import Login from './Login';
+import useSessionChannel from './useSessionChannel';
 
 const App = () => {
   const gunRef = useRef();
   const userRef = useRef();
-  const channelRef = useRef();
+  const sessionChannel = useSessionChannel({ userRef });
   const [isLoggedIn, setIsLoggedIn] = useState();
 
   useEffect(() => {
@@ -21,43 +22,9 @@ const App = () => {
       // use broadcast channels to sync between tabs
       .recall({ sessionStorage: true });
 
-    const channel = new BroadcastChannel('test_channel');
-
-    // let other tabs know we're here, in case one is logged in
-    channel.postMessage({
-      eventName: 'I_NEED_CREDS',
-    });
-
-    // check if other tabs are logged in
-    channel.onmessage = (e) => {
-      if (e.isTrusted) {
-        const { eventName, value } = e.data;
-
-        if (eventName === 'I_NEED_CREDS') {
-          // send to tab
-          channel.postMessage({
-            eventName: 'I_HAVE_CREDS',
-            value: window.sessionStorage.getItem('pair'),
-          });
-        }
-
-        if (eventName === 'I_HAVE_CREDS') {
-          const storedPair = window.sessionStorage.getItem('pair');
-
-          if (value && !storedPair) {
-            user.auth(JSON.parse(value));
-          }
-        }
-
-        if (eventName === 'REMOVE_YOUR_CREDS') {
-          logOut();
-        }
-      }
-    };
-
     gun.on('auth', () => {
       // notify other tabs
-      channel.postMessage({
+      sessionChannel.postMessage({
         eventName: 'I_HAVE_CREDS',
         value: window.sessionStorage.getItem('pair'),
       });
@@ -65,21 +32,31 @@ const App = () => {
       setIsLoggedIn(true);
     });
 
+    sessionChannel.onMessage((e) => {
+      const { eventName } = e.data;
+
+      if (eventName === 'REMOVE_YOUR_CREDS') {
+        logOut();
+      }
+    });
+
     gunRef.current = gun;
     userRef.current = user;
-    channelRef.current = channel;
-
-    return () => {
-      channel.close();
-    };
   }, []);
 
-  const logOut = (e) => {
+  const logOut = (evt) => {
     userRef.current.leave();
 
-    if (e) {
-      // logged out from click, notify other tabs
-      channelRef.current.postMessage({
+    // check if logout failed, if so manually remove
+    // user from session storage
+    // see https://gun.eco/docs/User#user-leave
+    if (userRef.current._.sea) {
+      window.sessionStorage.removeItem('pair');
+    }
+
+    // logged out from click, notify other tabs
+    if (evt) {
+      sessionChannel.postMessage({
         eventName: 'REMOVE_YOUR_CREDS',
       });
     }
