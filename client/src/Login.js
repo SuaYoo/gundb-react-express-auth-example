@@ -7,7 +7,6 @@ export default function Login({ gunRef, userRef }) {
 
   const logIn = () => {
     userRef.current.auth(username, password, ({ err }) => {
-      console.log(username, err);
       if (err) {
         setAuthError(err);
       }

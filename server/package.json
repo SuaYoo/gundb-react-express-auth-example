@@ -5,10 +5,16 @@
   "private": true,
   "main": "server.js",
   "scripts": {
-    "start": "node ./server.js"
+    "start": "node ./server.js",
+    "watch": "nodemon ./server.js",
+    "generate-app-key": "node ./generateAppKey.js"
   },
   "dependencies": {
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "gun": "^0.2020.1235"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.14"
   }
 }

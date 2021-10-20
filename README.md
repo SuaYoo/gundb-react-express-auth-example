@@ -7,32 +7,62 @@ Example with:
 - [x] change password
 - [x] update user profile
 - [x] multi-tab session syncing
+- [x] access control--only allow logged in users to update areas
 - [ ] user list
-- [ ] users' online/offline status
 
 no-style styled. it's ugly but it "works"
 
 ## Running the app
 
-start the server:
+### express server setup
+
+generate an app key pair:
 
 ```bash
 $ cd server
+$ yarn generate-app-key
+# output should be kept secret
+```
+
+save env variable to .env file:
+
+```bash
+$ cp .env.example .env
+# save the output from last step in your new file
+```
+
+start the server:
+
+```bash
 $ yarn
 $ yarn start
 ```
 
-the server runs on port 8765.
+the server runs on port 8765. to start with file watching and server reload enabled:
+
+```bash
+$ yarn watch
+# instead of yarn start
+```
+
+### react client setup
+
+save env variable to .env file:
+
+```bash
+$ cd client
+$ cp .env.example .env
+# add just the public key from your server env here
+```
 
 start the client app:
 
 ```bash
-$ cd client
 $ yarn
 $ yarn start
 ```
 
-open http://localhost:8081 and try it out.
+open http://localhost:8081 and try it out. updating any of the files in client/src will hot reload the page.
 
 ### Stuff I learned
 
@@ -41,4 +71,6 @@ open http://localhost:8081 and try it out.
 
 ### Open questions
 
-What's the best way of keeping a list of users in the db? gun superuser?
+~~What's the best way of keeping a list of users in the db? gun superuser?~~
+
+Create server app as super user and having it give out certificates to end users seems to be working

@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   module: {
@@ -16,6 +17,7 @@ module.exports = {
   },
   devtool: 'inline-source-map',
   plugins: [
+    new Dotenv(),
     new HtmlWebpackPlugin({
       title: 'client',
       template: './src/index.html',

@@ -9,6 +9,7 @@ import useSessionChannel from './useSessionChannel';
 const App = () => {
   const gunRef = useRef();
   const userRef = useRef();
+  const certificateRef = useRef();
   const sessionChannel = useSessionChannel({ userRef });
   const [userProfile, setUserProfile] = useState();
 
@@ -31,6 +32,25 @@ const App = () => {
       });
 
       user.get('alias').once((username) => {
+        // get new certificate
+        fetch('http://localhost:8765/api/certificates', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username,
+            pub: user.is.pub,
+          }),
+        })
+          .then((resp) => resp.json())
+          .then(({ certificate }) => {
+            // store certificate in app memory
+            // TODO check if expiry isn't working or misconfigured
+            // TODO handle expired certificates
+            certificateRef.current = certificate;
+          });
+
         setUserProfile((p) => ({
           ...p,
           username,
@@ -53,6 +73,8 @@ const App = () => {
   }, []);
 
   const logOut = (evt) => {
+    certificateRef.current = null;
+
     userRef.current.leave();
 
     // check if logout failed, if so manually remove
@@ -74,7 +96,11 @@ const App = () => {
 
   return (
     <div>
-      {!userProfile && <Login gunRef={gunRef} userRef={userRef} />}
+      {!userProfile && (
+        <div>
+          <Login gunRef={gunRef} userRef={userRef} />
+        </div>
+      )}
       {userProfile && (
         <div>
           <h1>community</h1>
@@ -84,7 +110,11 @@ const App = () => {
           </div>
           <h2>your info</h2>
           <div>
-            <UserInfo gunRef={gunRef} userRef={userRef} />
+            <UserInfo
+              gunRef={gunRef}
+              userRef={userRef}
+              certificateRef={certificateRef}
+            />
           </div>
         </div>
       )}

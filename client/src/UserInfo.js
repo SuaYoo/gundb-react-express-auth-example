@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 
-export default function UserInfo({ gunRef, userRef }) {
+const APP_PUBLIC_KEY = process.env.APP_PUBLIC_KEY;
+
+export default function UserInfo({ gunRef, userRef, certificateRef }) {
   const [displayName, setDisplayName] = useState('');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -15,15 +17,25 @@ export default function UserInfo({ gunRef, userRef }) {
     setProfileEditError();
     setProfileEditSuccess();
 
-    userRef.current.get('displayName').put(displayName, ({ err }) => {
-      if (err) {
-        setProfileEditError(err);
-      } else {
-        setProfileEditSuccess(
-          `Successfully changed display name to ${displayName}`
-        );
-      }
-    });
+    gunRef.current
+      .get(`~${APP_PUBLIC_KEY}`)
+      .get('profiles')
+      .get(userRef.current.is.pub)
+      .put(
+        { displayName: displayName },
+        ({ err }) => {
+          if (err) {
+            setProfileEditError(err);
+          } else {
+            setProfileEditSuccess(
+              `Successfully changed display name to ${displayName}`
+            );
+          }
+        },
+        {
+          opt: { cert: certificateRef.current },
+        }
+      );
   };
 
   const handleSubmitPassword = (e) => {
@@ -34,7 +46,7 @@ export default function UserInfo({ gunRef, userRef }) {
 
     // re-auth user
     userRef.current.get('alias').then((username) => {
-      userRef.current.auth(username, oldPassword, ({ err, sea, ...other }) => {
+      userRef.current.auth(username, oldPassword, ({ err, sea }) => {
         if (err) {
           setAuthError('Wrong password');
         } else {
