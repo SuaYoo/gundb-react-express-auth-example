@@ -3,6 +3,7 @@ import Gun from 'gun/gun';
 import 'gun/sea';
 
 import Login from './Login';
+import UserInfo from './UserInfo';
 import useSessionChannel from './useSessionChannel';
 
 const App = () => {
@@ -29,6 +30,10 @@ const App = () => {
         value: window.sessionStorage.getItem('pair'),
       });
 
+      // user.get('profile').put({
+      //   name: 'test name',
+      // });
+
       setIsLoggedIn(true);
     });
 
@@ -39,6 +44,14 @@ const App = () => {
         logOut();
       }
     });
+
+    gun
+      .get('users')
+      .once()
+      .map()
+      .once((user, username) => {
+        console.log('user:', user, username);
+      });
 
     gunRef.current = gun;
     userRef.current = user;
@@ -69,8 +82,14 @@ const App = () => {
       {!isLoggedIn && <Login gunRef={gunRef} userRef={userRef} />}
       {isLoggedIn && (
         <div>
-          <div>logged in</div>
-          <button onClick={logOut}>Log out</button>
+          <h1>community</h1>
+          <div>
+            logged in <button onClick={logOut}>Log out</button>
+          </div>
+          <h2>your info</h2>
+          <div>
+            <UserInfo gunRef={gunRef} userRef={userRef} />
+          </div>
         </div>
       )}
     </div>

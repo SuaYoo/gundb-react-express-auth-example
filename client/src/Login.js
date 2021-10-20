@@ -2,20 +2,23 @@ import Gun from 'gun/gun';
 import React, { useState } from 'react';
 
 export default function Login({ gunRef, userRef }) {
-  const [username, setUsername] = useState('a');
-  const [passphrase, setPassphrase] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState();
+
+  const logIn = () => {
+    userRef.current.auth(username, password, ({ err }) => {
+      if (err) {
+        setAuthError(err);
+      }
+    });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     setAuthError();
-
-    userRef.current.auth(username, passphrase, ({ err }) => {
-      if (err) {
-        setAuthError(err);
-      }
-    });
+    logIn();
   };
 
   const handleSignUp = () => {
@@ -26,9 +29,19 @@ export default function Login({ gunRef, userRef }) {
       if (user) {
         setAuthError('Username already taken');
       } else {
-        userRef.current.create(username, passphrase, ({ err }) => {
+        userRef.current.create(username, password, ({ err }) => {
           if (err) {
             setAuthError(err);
+          } else {
+            // add user to db
+            const newUser = gunRef.current
+              .get(username)
+              .put({ displayName: null });
+
+            gunRef.current.get('users').set(newUser);
+
+            // log in
+            logIn();
           }
         });
       }
@@ -37,6 +50,7 @@ export default function Login({ gunRef, userRef }) {
 
   return (
     <div>
+      <h1>log in</h1>
       <form onSubmit={handleSubmit}>
         <div>
           <label>
@@ -50,12 +64,12 @@ export default function Login({ gunRef, userRef }) {
         </div>
         <div>
           <label>
-            passphrase
+            password
             <input
-              name="passphrase"
+              name="password"
               type="password"
-              value={passphrase}
-              onChange={(e) => setPassphrase(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </label>
         </div>
