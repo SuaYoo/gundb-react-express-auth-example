@@ -67,10 +67,10 @@ open http://localhost:8081 and try it out. updating any of the files in client/s
 ### Stuff I learned
 
 - Webpack doesn't love the gun package. Add `noParse: /(\/gun|gun\/sea)\.js$/` to webpack.config.js to suppress warnings
-- gun only supports sessionStorage, which means users need to log in to each tab/window they open. I'm using BroadcastChannel (with a polyfill) to get around this
+- gun only supports `sessionStorage`, which means users need to log in to each tab/window they open. I'm using `BroadcastChannel` to get around this
 
 ### Open questions
 
 ~~What's the best way of keeping a list of users in the db? gun superuser?~~
 
-Create server app as super user and having it give out certificates to end users seems to be working
+Create server app as super user and having it give out certificates to end users seems to be working, although certificates won't expire and block lists don't work as of `v^0.2020.1235`.
