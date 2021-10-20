@@ -66,7 +66,7 @@ const App = () => {
 
   return (
     <div>
-      {!isLoggedIn && <Login userRef={userRef} />}
+      {!isLoggedIn && <Login gunRef={gunRef} userRef={userRef} />}
       {isLoggedIn && (
         <div>
           <div>logged in</div>
