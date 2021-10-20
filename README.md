@@ -2,12 +2,13 @@
 
 Example with:
 
-- sign up
-- sign in
-- change password
-- update user profile
-- users' online/offline status
-- multi-tab session syncing
+- [x] sign up
+- [x] sign in
+- [x] change password
+- [x] update user profile
+- [x] multi-tab session syncing
+- [ ] user list
+- [ ] users' online/offline status
 
 no-style styled. it's ugly but it "works"
 
@@ -37,3 +38,7 @@ open http://localhost:8081 and try it out.
 
 - Webpack doesn't love the gun package. Add `noParse: /(\/gun|gun\/sea)\.js$/` to webpack.config.js to suppress warnings
 - gun only supports sessionStorage, which means users need to log in to each tab/window they open. I'm using BroadcastChannel (with a polyfill) to get around this
+
+### Open questions
+
+What's the best way of keeping a list of users in the db? gun superuser?
