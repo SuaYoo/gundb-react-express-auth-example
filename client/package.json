@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "webpack --watch",
-    "start": "webpack serve --mode development --hot --open",
+    "start": "webpack serve --mode development --hot",
     "build": "webpack --mode production"
   },
   "devDependencies": {
@@ -21,6 +21,7 @@
     "webpack-dev-server": "^4.3.1"
   },
   "dependencies": {
+    "broadcastchannel-polyfill": "^1.0.1",
     "gun": "^0.2020.1235",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"

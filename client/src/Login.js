@@ -1,34 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Gun from 'gun/gun';
-import 'gun/sea';
+import React, { useState } from 'react';
 
-export default function Login() {
-  const gunRef = useRef();
-  const userRef = useRef();
-  const [username, setUsername] = useState('');
+export default function Login({ userRef }) {
+  const [username, setUsername] = useState('juic8y-test');
   const [passphrase, setPassphrase] = useState('');
-
-  useEffect(() => {
-    const gun = Gun([
-      'http://localhost:8765/gun',
-      'https://gun-manhattan.herokuapp.com/gun',
-    ]);
-
-    const user = gun.user();
-
-    // only initialize once when component is mounted
-    gunRef.current = gun;
-    userRef.current = user;
-  }, []);
+  const [authError, setAuthError] = useState();
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    userRef.current.auth(username, password);
+    setAuthError();
+
+    userRef.current.auth(username, passphrase, ({ err }) => {
+      if (err) {
+        setAuthError(err);
+      }
+    });
   };
 
   const handleSignUp = () => {
-    userRef.current.create(username, password);
+    setAuthError();
+
+    userRef.current.create(username, passphrase, ({ err }) => {
+      if (err) {
+        setAuthError(err);
+      }
+    });
   };
 
   return (
@@ -54,8 +50,13 @@ export default function Login() {
           />
         </label>
       </div>
-      <button type="submit">sign in</button>
-      <button onClick={handleSignUp}>sign up</button>
+
+      {authError && <div style={{ color: 'red' }}>{authError}</div>}
+
+      <div>
+        <button type="submit">sign in</button>
+        <button onClick={handleSignUp}>sign up</button>
+      </div>
     </form>
   );
 }
