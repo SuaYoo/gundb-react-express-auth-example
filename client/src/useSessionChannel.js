@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react';
 
+import useGunContext from './useGunContext';
+
 // sync session across tabs using a broadcast channel
-export default function useSessionChannel({ userRef }) {
+export default function useSessionChannel() {
+  const { getUser } = useGunContext();
   const channelRef = useRef();
 
   useEffect(() => {
@@ -29,7 +32,7 @@ export default function useSessionChannel({ userRef }) {
           const storedPair = window.sessionStorage.getItem('pair');
 
           if (value && !storedPair) {
-            userRef.current.auth(JSON.parse(value));
+            getUser().auth(JSON.parse(value));
           }
         }
       }
@@ -40,7 +43,7 @@ export default function useSessionChannel({ userRef }) {
     return () => {
       channel.close();
     };
-  }, []);
+  }, [getUser]);
 
   return {
     onMessage: (cb) => {

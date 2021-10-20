@@ -1,61 +1,31 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Gun from 'gun/gun';
-import 'gun/sea';
+import React, { useState, useEffect } from 'react';
 
 import Login from './Login';
 import UserInfo from './UserInfo';
 import useSessionChannel from './useSessionChannel';
+import useGunContext from './useGunContext';
 
 const App = () => {
-  const gunRef = useRef();
-  const userRef = useRef();
-  const certificateRef = useRef();
-  const sessionChannel = useSessionChannel({ userRef });
+  const { getUser, setCertificate, onAuth } = useGunContext();
+  const sessionChannel = useSessionChannel();
   const [userProfile, setUserProfile] = useState();
 
   useEffect(() => {
-    const gun = Gun(['http://localhost:8765/gun']);
-
-    // create user
-    const user = gun
-      .user()
-      // save user creds in session storage
-      // this appears to be the only type of storage supported.
-      // use broadcast channels to sync between tabs
-      .recall({ sessionStorage: true });
-
-    gun.on('auth', () => {
+    onAuth(() => {
       // notify other tabs
       sessionChannel.postMessage({
         eventName: 'I_HAVE_CREDS',
         value: window.sessionStorage.getItem('pair'),
       });
 
-      user.get('alias').once((username) => {
-        // get new certificate
-        fetch('http://localhost:8765/api/certificates', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+      getUser()
+        .get('alias')
+        .once((username) => {
+          setUserProfile((p) => ({
+            ...p,
             username,
-            pub: user.is.pub,
-          }),
-        })
-          .then((resp) => resp.json())
-          .then(({ certificate }) => {
-            // store certificate in app memory
-            // TODO check if expiry isn't working or misconfigured
-            // TODO handle expired certificates
-            certificateRef.current = certificate;
-          });
-
-        setUserProfile((p) => ({
-          ...p,
-          username,
-        }));
-      });
+          }));
+        });
     });
 
     sessionChannel.onMessage((e) => {
@@ -67,20 +37,19 @@ const App = () => {
         logOut();
       }
     });
-
-    gunRef.current = gun;
-    userRef.current = user;
   }, []);
 
   const logOut = (evt) => {
-    certificateRef.current = null;
+    setCertificate(null);
 
-    userRef.current.leave();
+    const user = getUser();
+
+    user.leave();
 
     // check if logout failed, if so manually remove
     // user from session storage
     // see https://gun.eco/docs/User#user-leave
-    if (userRef.current._.sea) {
+    if (user._.sea) {
       window.sessionStorage.removeItem('pair');
     }
 
@@ -98,7 +67,7 @@ const App = () => {
     <div>
       {!userProfile && (
         <div>
-          <Login gunRef={gunRef} userRef={userRef} />
+          <Login />
         </div>
       )}
       {userProfile && (
@@ -110,11 +79,7 @@ const App = () => {
           </div>
           <h2>your info</h2>
           <div>
-            <UserInfo
-              gunRef={gunRef}
-              userRef={userRef}
-              certificateRef={certificateRef}
-            />
+            <UserInfo />
           </div>
         </div>
       )}

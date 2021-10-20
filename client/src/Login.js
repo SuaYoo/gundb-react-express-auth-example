@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 
-export default function Login({ gunRef, userRef }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+import useGunContext from './useGunContext';
+
+export default function Login() {
+  const { getGun, getUser } = useGunContext();
+  const [username, setUsername] = useState('demo');
+  const [password, setPassword] = useState('password');
   const [authError, setAuthError] = useState();
 
   const logIn = () => {
-    userRef.current.auth(username, password, ({ err }) => {
+    getUser().auth(username, password, ({ err }) => {
       if (err) {
         setAuthError(err);
       }
@@ -24,24 +27,26 @@ export default function Login({ gunRef, userRef }) {
     setAuthError();
 
     // check if user with username already exists
-    gunRef.current.get(`~@${username}`).once((user) => {
-      if (user) {
-        setAuthError('Username already taken');
-      } else {
-        userRef.current.create(username, password, ({ err }) => {
-          if (err) {
-            setAuthError(err);
-          } else {
-            // TODO add user to db so we can build user list
-            // NOTE gundb is probably not the best place to store this
-            // list since anyone can edit it?
+    getGun()
+      .get(`~@${username}`)
+      .once((user) => {
+        if (user) {
+          setAuthError('Username already taken');
+        } else {
+          getUser().create(username, password, ({ err }) => {
+            if (err) {
+              setAuthError(err);
+            } else {
+              // TODO add user to db so we can build user list
+              // NOTE gundb is probably not the best place to store this
+              // list since anyone can edit it?
 
-            // log in
-            logIn();
-          }
-        });
-      }
-    });
+              // log in
+              logIn();
+            }
+          });
+        }
+      });
   };
 
   return (

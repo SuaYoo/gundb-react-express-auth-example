@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 
+import useGunContext from './useGunContext';
+
 const APP_PUBLIC_KEY = process.env.APP_PUBLIC_KEY;
 
-export default function UserInfo({ gunRef, userRef, certificateRef }) {
+export default function UserInfo() {
+  const { getGun, getUser, getCertificate } = useGunContext();
   const [displayName, setDisplayName] = useState('');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -17,10 +20,10 @@ export default function UserInfo({ gunRef, userRef, certificateRef }) {
     setProfileEditError();
     setProfileEditSuccess();
 
-    gunRef.current
+    getGun()
       .get(`~${APP_PUBLIC_KEY}`)
       .get('profiles')
-      .get(userRef.current.is.pub)
+      .get(getUser().is.pub)
       .put(
         { displayName: displayName },
         ({ err }) => {
@@ -33,7 +36,7 @@ export default function UserInfo({ gunRef, userRef, certificateRef }) {
           }
         },
         {
-          opt: { cert: certificateRef.current },
+          opt: { cert: getCertificate() },
         }
       );
   };
@@ -44,13 +47,15 @@ export default function UserInfo({ gunRef, userRef, certificateRef }) {
     setAuthError();
     setAuthSuccess();
 
+    const user = getUser();
+
     // re-auth user
-    userRef.current.get('alias').then((username) => {
-      userRef.current.auth(username, oldPassword, ({ err, sea }) => {
+    user.get('alias').then((username) => {
+      user.auth(username, oldPassword, ({ err, sea }) => {
         if (err) {
           setAuthError('Wrong password');
         } else {
-          userRef.current.auth(
+          user.auth(
             sea,
             ({ err }) => {
               if (err) {
