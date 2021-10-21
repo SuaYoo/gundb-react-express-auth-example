@@ -12,7 +12,6 @@ Example with:
   - 2. only allow users with valid certificates to modify app-specific space
   - needs a server to work. see [Server README](./server/README.md) for details
 - [x] list user profiles in UI
-- [ ] restrict puts altogether with https://github.com/zrrrzzt/bullet-catcher
 
 no-style styled. it's ugly but it "works"
 

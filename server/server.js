@@ -1,11 +1,13 @@
 const express = require('express');
+const cors = require('cors');
 const jwt = require('jsonwebtoken');
 let Gun = require('gun');
 const SEA = require('gun/sea');
 const withBulletCatcher = require('./withBulletCatcher');
 
-// require('bullet-catcher');
+// implements custom middleware based on bullet catcher
 Gun = withBulletCatcher(Gun);
+// require('bullet-catcher');
 require('dotenv').config();
 
 const app = express();
@@ -59,8 +61,10 @@ gun.user().auth(APP_KEY_PAIR, ({ err }) => {
 
 // parse application/json
 app.use(express.json());
+// if you're allowing gun access to more than one http origin,
+// you'll want to make sure that CORs for API routes is configured
+//  app.use(cors())
 
-// TODO CORS
 app.post('/api/certificates', async (req, res) => {
   const { username, pub: userPubKey } = req.body;
 
