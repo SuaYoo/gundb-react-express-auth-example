@@ -8,9 +8,9 @@ Example with:
 - [x] update user profile
 - [x] multi-tab session syncing
 - [x] access control with JWT + certificates
-  - 1. only allow users with valid access token from modifying "public" space
+  - 1. only allow users with valid access token when modifying ["public" space](https://gun.eco/docs/#data)
   - 2. only allow users with valid certificates to modify app-specific space
-  - needs a server to work. see [Server README](./server/README.md) for details
+  - note, needs a server for this to work. see [Server README](./server/README.md) for details
 - [x] list user profiles in UI
 
 no-style styled. it's ugly but it "works"

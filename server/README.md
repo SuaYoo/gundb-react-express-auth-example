@@ -36,6 +36,11 @@ gun
 
 As it stands, this isn't much different in terms of functionality from defining a profile as `gun.user().put({ name: 'alice' })`, storing all public keys somewhere and getting public data from each user, but the policy can be extended to other private app spaces (like a user-edited message board.)
 
+JSON web tokens can be used to prevent just _anyone_ from modifying public data. JWTs are implemented as access tokens in this example, before heading to production you'll want to configure a couple things:
+
+- CORS, if you want to restrict API routes to generate tokens & certificates to specific origins (gundb allows all origins by default, since CORS is not enforced with websockets.)
+- Handle invalid tokens, e.g. when they expire--you can do this server side or client side.
+
 ## Dev
 
 generate an app key pair:
