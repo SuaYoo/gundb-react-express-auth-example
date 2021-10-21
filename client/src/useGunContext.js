@@ -48,6 +48,12 @@ export const GunContextProvider = ({ children }) => {
           accessToken: accessTokenRef.current,
         };
         to.next(msg); // pass to next middleware
+
+        if (msg.err === 'Invalid access token') {
+          // not implemented: handle invalid access token
+          // you might want to do a silent refresh, or
+          // redirect the user to a log in page
+        }
       });
     });
 

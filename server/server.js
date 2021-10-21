@@ -1,9 +1,11 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const Gun = require('gun');
+let Gun = require('gun');
 const SEA = require('gun/sea');
+const withBulletCatcher = require('./withBulletCatcher');
 
-require('bullet-catcher');
+// require('bullet-catcher');
+Gun = withBulletCatcher(Gun);
 require('dotenv').config();
 
 const app = express();
@@ -17,11 +19,6 @@ const server = app.listen(port, () => {
   console.log(`App listening at http://localhost:${port}`);
 });
 
-const gun = Gun({
-  web: server,
-  isValid: verifyToken,
-});
-
 // verify JWT from gun message
 function verifyToken(msg) {
   if (msg?.headers?.accessToken) {
@@ -30,12 +27,24 @@ function verifyToken(msg) {
 
       return true;
     } catch (err) {
-      // TODO differentiate invalid from expired token
+      const error = new Error('Invalid access token');
+
+      if (err.name === 'TokenExpiredError') {
+        // you might want to implement silent refresh here
+        error.expiredAt = err.expiredAt;
+      }
+
+      return error;
     }
   }
 
   return false;
 }
+
+const gun = Gun({
+  web: server,
+  isValid: verifyToken,
+});
 
 // Sync everything
 gun.on('out', { get: { '#': { '*': '' } } });
@@ -100,7 +109,6 @@ app.post('/api/tokens', async (req, res) => {
   const { username, pub } = req.body;
 
   const token = jwt.sign({ username, pub }, APP_TOKEN_SECRET, {
-    // TODO handle expired tokens
     expiresIn: '1h',
   });
 
