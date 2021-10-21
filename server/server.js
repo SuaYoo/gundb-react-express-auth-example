@@ -3,11 +3,10 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 let Gun = require('gun');
 const SEA = require('gun/sea');
-const withBulletCatcher = require('./withBulletCatcher');
 
-// implements custom middleware based on bullet catcher
-Gun = withBulletCatcher(Gun);
-// require('bullet-catcher');
+// implements forked version of bullet catcher with
+// additional error handling
+require('bullet-catcher');
 require('dotenv').config();
 
 const app = express();
