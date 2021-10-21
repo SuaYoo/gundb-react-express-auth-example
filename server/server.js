@@ -1,12 +1,19 @@
 const express = require('express');
-const Gun = require('gun');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+let Gun = require('gun');
 const SEA = require('gun/sea');
+const withBulletCatcher = require('./withBulletCatcher');
 
+// implements custom middleware based on bullet catcher
+Gun = withBulletCatcher(Gun);
+// require('bullet-catcher');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 8765;
 const APP_KEY_PAIR = JSON.parse(process.env.APP_KEY_PAIR);
+const APP_TOKEN_SECRET = process.env.APP_TOKEN_SECRET;
 
 app.use(Gun.serve);
 
@@ -14,10 +21,31 @@ const server = app.listen(port, () => {
   console.log(`App listening at http://localhost:${port}`);
 });
 
-// Pass the validation function as isValid
+// verify JWT from gun message
+function verifyToken(msg) {
+  if (msg?.headers?.accessToken) {
+    try {
+      jwt.verify(msg.headers.accessToken, APP_TOKEN_SECRET);
+
+      return true;
+    } catch (err) {
+      const error = new Error('Invalid access token');
+
+      if (err.name === 'TokenExpiredError') {
+        // you might want to implement silent refresh here
+        error.expiredAt = err.expiredAt;
+      }
+
+      return error;
+    }
+  }
+
+  return false;
+}
+
 const gun = Gun({
   web: server,
-  // isValid: hasValidToken,
+  isValid: verifyToken,
 });
 
 // Sync everything
@@ -33,8 +61,10 @@ gun.user().auth(APP_KEY_PAIR, ({ err }) => {
 
 // parse application/json
 app.use(express.json());
+// if you're allowing gun access to more than one http origin,
+// you'll want to make sure that CORs for API routes is configured
+//  app.use(cors())
 
-// TODO CORS
 app.post('/api/certificates', async (req, res) => {
   const { username, pub: userPubKey } = req.body;
 
@@ -76,5 +106,17 @@ app.post('/api/certificates', async (req, res) => {
   res.status(201).send({
     certificate,
     expires_at: expiresAt,
+  });
+});
+
+app.post('/api/tokens', async (req, res) => {
+  const { username, pub } = req.body;
+
+  const token = jwt.sign({ username, pub }, APP_TOKEN_SECRET, {
+    expiresIn: '1h',
+  });
+
+  res.status(201).send({
+    accessToken: token,
   });
 });
