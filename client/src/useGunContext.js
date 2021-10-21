@@ -48,26 +48,28 @@ export const GunContextProvider = ({ children }) => {
       .recall({ sessionStorage: true });
 
     gun.on('auth', (...args) => {
-      user.get('alias').once((username) => {
+      if (!certificateRef.current) {
         // get new certificate
-        fetch('http://localhost:8765/api/certificates', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username,
-            pub: user.is.pub,
-          }),
-        })
-          .then((resp) => resp.json())
-          .then(({ certificate }) => {
-            // store certificate in app memory
-            // TODO check if expiry isn't working or misconfigured
-            // TODO handle expired certificates
-            certificateRef.current = certificate;
-          });
-      });
+        user.get('alias').once((username) => {
+          fetch('http://localhost:8765/api/certificates', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username,
+              pub: user.is.pub,
+            }),
+          })
+            .then((resp) => resp.json())
+            .then(({ certificate }) => {
+              // store certificate in app memory
+              // TODO check if expiry isn't working or misconfigured
+              // TODO handle expired certificates
+              certificateRef.current = certificate;
+            });
+        });
+      }
 
       if (onAuthCbRef.current) {
         onAuthCbRef.current(...args);

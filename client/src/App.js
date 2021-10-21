@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 
 import Login from './Login';
 import UserInfo from './UserInfo';
+import UserList from './UserList';
 import useSessionChannel from './useSessionChannel';
 import useGunContext from './useGunContext';
 
+const APP_PUBLIC_KEY = process.env.APP_PUBLIC_KEY;
+
 const App = () => {
-  const { getUser, setCertificate, onAuth } = useGunContext();
+  const { getGun, getUser, setCertificate, onAuth } = useGunContext();
   const sessionChannel = useSessionChannel();
   const [userProfile, setUserProfile] = useState();
 
@@ -18,13 +21,12 @@ const App = () => {
         value: window.sessionStorage.getItem('pair'),
       });
 
-      getUser()
-        .get('alias')
-        .once((username) => {
-          setUserProfile((p) => ({
-            ...p,
-            username,
-          }));
+      getGun()
+        .get(`~${APP_PUBLIC_KEY}`)
+        .get('profiles')
+        .get(getUser().is.pub)
+        .on((profile) => {
+          setUserProfile(profile);
         });
     });
 
@@ -74,8 +76,12 @@ const App = () => {
         <div>
           <h1>community</h1>
           <div>
-            logged in as {userProfile.username}.{' '}
+            logged in as {userProfile.displayName} ({userProfile.username}).{' '}
             <button onClick={logOut}>Log out</button>
+          </div>
+          <h2>user profiles</h2>
+          <div>
+            <UserList />
           </div>
           <h2>your info</h2>
           <div>

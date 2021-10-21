@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 
 import useGunContext from './useGunContext';
 
+const APP_PUBLIC_KEY = process.env.APP_PUBLIC_KEY;
+
 export default function Login() {
-  const { getGun, getUser } = useGunContext();
+  const { getGun, getUser, setCertificate } = useGunContext();
   const [username, setUsername] = useState('demo');
   const [password, setPassword] = useState('password');
   const [authError, setAuthError] = useState();
@@ -14,6 +16,36 @@ export default function Login() {
         setAuthError(err);
       }
     });
+  };
+
+  const onCreateSuccess = ({ pub }) => {
+    // get certificate and store in app memory
+    fetch('http://localhost:8765/api/certificates', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username,
+        pub,
+      }),
+    })
+      .then((resp) => resp.json())
+      .then(({ certificate }) => {
+        setCertificate(certificate);
+
+        // add user to user/profile list
+        getGun()
+          .get(`~${APP_PUBLIC_KEY}`)
+          .get('profiles')
+          .get(pub)
+          .put({ username }, null, {
+            opt: { cert: certificate },
+          });
+
+        // log in
+        logIn();
+      });
   };
 
   const handleSubmit = (e) => {
@@ -33,16 +65,11 @@ export default function Login() {
         if (user) {
           setAuthError('Username already taken');
         } else {
-          getUser().create(username, password, ({ err }) => {
+          getUser().create(username, password, ({ err, pub }) => {
             if (err) {
               setAuthError(err);
             } else {
-              // TODO add user to db so we can build user list
-              // NOTE gundb is probably not the best place to store this
-              // list since anyone can edit it?
-
-              // log in
-              logIn();
+              onCreateSuccess({ pub });
             }
           });
         }

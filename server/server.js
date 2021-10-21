@@ -63,14 +63,14 @@ app.post('/api/certificates', async (req, res) => {
       } else {
         console.log(`Successfully created certificate for ${username}`);
       }
-    }
+    },
     // FIXME neither expiry or block seem to be working?
     // https://github.com/amark/gun/issues/1143
-    // {
-    //   expiry: expiresAt,
-    //   // name of path to blocked/banned users
-    //   block: 'blocked',
-    // }
+    {
+      // expiry: expiresAt,
+      // // name of path to blocked/banned users
+      // block: 'blocked',
+    }
   );
 
   res.status(201).send({
