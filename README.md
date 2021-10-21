@@ -7,8 +7,11 @@ Example with:
 - [x] change password
 - [x] update user profile
 - [x] multi-tab session syncing
-- [x] access control--only allow logged in users to update areas
-- [ ] user list
+- [x] access control
+  - only allows logged in users to update the app by creating an "app user"
+  - this method needs a server to work. see [Server README](./server/README.md) for details
+- [ ] list user profiles in UI
+- [ ] restrict puts altogether with https://github.com/zrrrzzt/bullet-catcher
 
 no-style styled. it's ugly but it "works"
 
