@@ -65,7 +65,7 @@ $ yarn
 $ yarn start
 ```
 
-open http://localhost:8081 and try it out. updating any of the files in client/src will hot reload the page.
+your default browser should open http://localhost:8081 in a new tab. updating any of the files in client/src will hot reload the page.
 
 ### Stuff I learned
 
