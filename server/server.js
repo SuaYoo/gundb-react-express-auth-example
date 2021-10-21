@@ -1,12 +1,15 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const Gun = require('gun');
 const SEA = require('gun/sea');
 
+require('bullet-catcher');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 8765;
 const APP_KEY_PAIR = JSON.parse(process.env.APP_KEY_PAIR);
+const APP_TOKEN_SECRET = process.env.APP_TOKEN_SECRET;
 
 app.use(Gun.serve);
 
@@ -14,11 +17,25 @@ const server = app.listen(port, () => {
   console.log(`App listening at http://localhost:${port}`);
 });
 
-// Pass the validation function as isValid
 const gun = Gun({
   web: server,
-  // isValid: hasValidToken,
+  isValid: verifyToken,
 });
+
+// verify JWT from gun message
+function verifyToken(msg) {
+  if (msg?.headers?.accessToken) {
+    try {
+      jwt.verify(msg.headers.accessToken, APP_TOKEN_SECRET);
+
+      return true;
+    } catch (err) {
+      // TODO differentiate invalid from expired token
+    }
+  }
+
+  return false;
+}
 
 // Sync everything
 gun.on('out', { get: { '#': { '*': '' } } });
@@ -76,5 +93,18 @@ app.post('/api/certificates', async (req, res) => {
   res.status(201).send({
     certificate,
     expires_at: expiresAt,
+  });
+});
+
+app.post('/api/tokens', async (req, res) => {
+  const { username, pub } = req.body;
+
+  const token = jwt.sign({ username, pub }, APP_TOKEN_SECRET, {
+    // TODO handle expired tokens
+    expiresIn: '1h',
+  });
+
+  res.status(201).send({
+    accessToken: token,
   });
 });

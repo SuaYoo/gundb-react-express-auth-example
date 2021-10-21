@@ -7,9 +7,10 @@ Example with:
 - [x] change password
 - [x] update user profile
 - [x] multi-tab session syncing
-- [x] access control
-  - only allows logged in users to update the app by creating an "app user"
-  - this method needs a server to work. see [Server README](./server/README.md) for details
+- [x] access control with JWT + certificates
+  - 1. only allow users with valid access token from modifying "public" space
+  - 2. only allow users with valid certificates to modify app-specific space
+  - needs a server to work. see [Server README](./server/README.md) for details
 - [x] list user profiles in UI
 - [ ] restrict puts altogether with https://github.com/zrrrzzt/bullet-catcher
 

@@ -34,9 +34,23 @@ export const GunContextProvider = ({ children }) => {
   const gunRef = useRef();
   const userRef = useRef();
   const certificateRef = useRef();
+  const accessTokenRef = useRef();
   const onAuthCbRef = useRef();
 
   useEffect(() => {
+    Gun.on('opt', (ctx) => {
+      if (ctx.once) return;
+
+      ctx.on('out', function (msg) {
+        const to = this.to;
+        // Adds headers for put
+        msg.headers = {
+          accessToken: accessTokenRef.current,
+        };
+        to.next(msg); // pass to next middleware
+      });
+    });
+
     const gun = Gun(['http://localhost:8765/gun']);
 
     // create user
@@ -48,6 +62,27 @@ export const GunContextProvider = ({ children }) => {
       .recall({ sessionStorage: true });
 
     gun.on('auth', (...args) => {
+      if (!accessTokenRef.current) {
+        // get new token
+        user.get('alias').once((username) => {
+          fetch('http://localhost:8765/api/tokens', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username,
+              pub: user.is.pub,
+            }),
+          })
+            .then((resp) => resp.json())
+            .then(({ accessToken }) => {
+              // store token in app memory
+              accessTokenRef.current = accessToken;
+            });
+        });
+      }
+
       if (!certificateRef.current) {
         // get new certificate
         user.get('alias').once((username) => {

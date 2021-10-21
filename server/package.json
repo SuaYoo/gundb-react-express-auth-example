@@ -10,9 +10,11 @@
     "generate-app-key": "node ./generateAppKey.js"
   },
   "dependencies": {
+    "bullet-catcher": "^3.0.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
-    "gun": "^0.2020.1235"
+    "gun": "^0.2020.1235",
+    "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.14"
