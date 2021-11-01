@@ -85,7 +85,6 @@ app.post('/api/certificates', async (req, res) => {
     [userPubKey],
     policy,
     APP_KEY_PAIR,
-    null,
     ({ err }) => {
       if (err) {
         console.log(`Error creating certificate for ${username}:`, err);
